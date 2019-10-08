@@ -1,9 +1,10 @@
 package nl.multicode.bsn
 
-import akka.actor.{ Actor, ActorLogging, Props }
+import akka.actor.{Actor, ActorLogging, Props}
+import nl.multicode.bsn.service.BsnService
+import nl.multicode.bsn.validate.BsnElfproef
 
 object BsnServiceActor {
-  final case class ActionPerformed(description: String)
   final case class GetBsn()
   final case class ValidateBsn(bsn: String)
 
@@ -13,10 +14,12 @@ object BsnServiceActor {
 class BsnServiceActor extends Actor with ActorLogging {
   import BsnServiceActor._
 
+  var bsnService : BsnService= new BsnService(new BsnElfproef)
+
   def receive: Receive = {
     case GetBsn =>
-      sender() ! "generated BSN" //generate and return BSN
+      sender() ! bsnService.generateRandomBsnNummers()
     case ValidateBsn(bsn) =>
-      sender() ! "false".concat(bsn) // validate incomming BSN
+      sender() ! bsnService.isValidBsn(bsn).toString
   }
 }
